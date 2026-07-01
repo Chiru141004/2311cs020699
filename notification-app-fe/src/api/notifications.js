@@ -1,41 +1,38 @@
-const notifications = [
-  {
-    id: 1,
-    type: "Placement",
-    message: "Google Hiring Drive",
-    timestamp: "2026-07-01T10:30:00",
-    read: false,
-  },
-  {
-    id: 2,
-    type: "Result",
-    message: "Mid Semester Results",
-    timestamp: "2026-07-01T09:00:00",
-    read: false,
-  },
-  {
-    id: 3,
-    type: "Event",
-    message: "Hackathon Registration",
-    timestamp: "2026-07-01T08:00:00",
-    read: true,
-  },
-  {
-    id: 4,
-    type: "Placement",
-    message: "Amazon Placement Drive",
-    timestamp: "2026-07-01T11:15:00",
-    read: false,
-  },
-  {
-    id: 5,
-    type: "Event",
-    message: "Farewell Event",
-    timestamp: "2026-07-01T07:00:00",
-    read: true,
-  },
-];
+import axios from "axios";
 
-export async function fetchNotifications() {
-  return notifications;
+const BASE_URL =
+  "http://4.224.186.213/evaluation-service/notifications";
+
+// For local testing only.
+// Before pushing to GitHub, replace with:
+// const TOKEN = import.meta.env.VITE_ACCESS_TOKEN;
+const TOKEN = "PASTE_YOUR_ACCESS_TOKEN_HERE";
+
+export async function fetchNotifications(
+  page = 1,
+  limit = 10,
+  notificationType = "All"
+) {
+  try {
+    const params = {
+      page,
+      limit,
+    };
+
+    if (notificationType !== "All") {
+      params.notification_type = notificationType.toLowerCase();
+    }
+
+    const response = await axios.get(BASE_URL, {
+      params,
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Notification API Error:", error.response?.data || error.message);
+    throw error;
+  }
 }

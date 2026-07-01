@@ -19,7 +19,14 @@ export function NotificationsPage() {
   const [filter, setFilter] = useState("All");
   const [page, setPage] = useState(1);
 
-  const { notifications, totalPages, loading, error } = useNotifications();
+  const limit = 10;
+
+const {
+  notifications,
+  totalPages,
+  loading,
+  error,
+} = useNotifications(page, limit, filter);
 
   // Filter notifications
   const filteredNotifications =

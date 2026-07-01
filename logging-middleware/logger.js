@@ -1,29 +1,51 @@
-const requestLogger = (req, res, next) => {
-    const start = Date.now();
-    const { method, url, ip } = req;
-    const timestamp = new Date().toISOString();
+const fs = require("fs");
+const path = require("path");
 
-    res.on('finish', () => {
-        const duration = Date.now() - start;
-        const { statusCode } = res;
+const logFile = path.join(__dirname, "requests.log");
 
-        const logData = {
-            timestamp,
-            method,
-            url,
-            statusCode,
-            duration: `${duration}ms`,
-            ip
+function requestLogger(req, res, next) {
+
+    const startTime = Date.now();
+
+    console.log("====================================");
+    console.log("Incoming Request");
+    console.log("Method :", req.method);
+    console.log("URL    :", req.originalUrl);
+    console.log("Time   :", new Date().toISOString());
+    console.log("IP     :", req.ip);
+
+    if (Object.keys(req.query).length) {
+        console.log("Query  :", req.query);
+    }
+
+    if (Object.keys(req.body || {}).length) {
+        console.log("Body   :", req.body);
+    }
+
+    res.on("finish", () => {
+
+        const duration = Date.now() - startTime;
+
+        const log = {
+            timestamp: new Date().toISOString(),
+            method: req.method,
+            endpoint: req.originalUrl,
+            status: res.statusCode,
+            responseTime: `${duration} ms`,
+            ip: req.ip,
         };
 
-        if (statusCode >= 400) {
-            console.error(`❌ [ERROR] ${JSON.stringify(logData)}`);
-        } else {
-            console.log(`ℹ️ [INFO] ${JSON.stringify(logData)}`);
-        }
+        console.log("Status :", res.statusCode);
+        console.log("Time   :", duration + " ms");
+        console.log("====================================");
+
+        fs.appendFileSync(
+            logFile,
+            JSON.stringify(log) + "\n"
+        );
     });
 
     next();
-};
+}
 
 module.exports = requestLogger;
